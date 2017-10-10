@@ -9,8 +9,11 @@ import logging
 sys.path.append("..")
 from utils.ascheduler import TimeAfterTimeScheduler
 from utils.ascheduler import TimeRangeScheduler
+
+from utils.errors import TaskFunctionExecutedError
 from utils.errors import FunctionReturnsValueError
 from utils.errors import FunctionMissingReturnsValueError
+
 
 
 logging.basicConfig(level=logging.INFO,
@@ -26,12 +29,10 @@ class TestTimeAfterTimeSchedulerMethods(unittest.TestCase):
         return self.value==0
 
     def action_func(self):
-        print "hello %s" % (time.time())
         self.value=self.value+1
         return True
 
     def task_func_failed(self,scheduler):
-        print "hello %s" %(scheduler.current_time)
         return False
 
     def setUp(self):
@@ -76,18 +77,15 @@ class TimeRangeSchedulerMethods(unittest.TestCase):
         return self.value==0
 
     def action_func(self,scheduler):
-        print "hello %s" % (scheduler.current_time)
         return True
 
     def task_func(self,scheduler):
-        print "hello %s" %(scheduler.current_time)
+        pass
 
     def task_func_returns_error_type(self,scheduler):
-        print "hello %s" %(scheduler.current_time)
         return 1
 
     def task_func_failed(self,scheduler):
-        print "hello %s" %(scheduler.current_time)
         return False
 
     def setUp(self):
@@ -138,6 +136,11 @@ class TimeRangeSchedulerMethods(unittest.TestCase):
         s.register_task_func(self.task_func_failed,{"scheduler":s})
         s.run()
         self.assertEqual(3,s.times,"This process is terminal.")
+
+        s = TimeRangeScheduler(start_time,end_time,'hours',1,delay_time=0, max_times=3,task_failed_mode='exit')
+
+        s.register_task_func(self.task_func_failed,{"scheduler":s})
+        self.assertRaises(TaskFunctionExecutedError,s.run)
 
 if __name__ == '__main__':
     unittest.main()

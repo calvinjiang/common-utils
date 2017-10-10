@@ -13,7 +13,6 @@ class TestCalendarMethods(unittest.TestCase):
 
         calendar = Calendar.generate(
             datetime.datetime.strptime("2016071403", "%Y%m%d%H"))
-        print(calendar)
 
         calendar = Calendar.generate(
             datetime.datetime.strptime("2016050112", "%Y%m%d%H"))

@@ -3,11 +3,25 @@
 
 import sys
 import re
-from errors import SystemCommandExecuteError
-from errors import UnSupportedMethodError
-from errors import TransferFilesError
-from cmd import CommandExecutor as ce
-from cmd import CommandResult
+
+
+if sys.version > '3':
+    PY3 = True
+else:
+    PY3 = False
+
+if PY3:
+    from .errors import SystemCommandExecuteError
+    from .errors import UnSupportedMethodError
+    from .errors import TransferFilesError
+    from .cmd import CommandExecutor as ce
+    from .cmd import CommandResult
+else:
+    from errors import SystemCommandExecuteError
+    from errors import UnSupportedMethodError
+    from errors import TransferFilesError
+    from cmd import CommandExecutor as ce
+    from cmd import CommandResult
 
 
 class Rsync:

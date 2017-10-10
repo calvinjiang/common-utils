@@ -9,15 +9,27 @@ Available classes:
 - TimeRangeScheduler: Execute registered function between start time and end time.
 
 """
-
+import sys
 import time
 import sched
 import datetime
 import logging
-from errors import TaskFunctionExecutedError
-from errors import FunctionReturnsValueError
-from errors import FunctionMissingReturnsValueError
-from errors import FunctionReturnsValueTypeError
+
+if sys.version > '3':
+    PY3 = True
+else:
+    PY3 = False
+
+if PY3:
+    from .errors import TaskFunctionExecutedError
+    from .errors import FunctionReturnsValueError
+    from .errors import FunctionMissingReturnsValueError
+    from .errors import FunctionReturnsValueTypeError
+else:
+    from errors import TaskFunctionExecutedError
+    from errors import FunctionReturnsValueError
+    from errors import FunctionMissingReturnsValueError
+    from errors import FunctionReturnsValueTypeError
 
 _logger = logging.getLogger(__name__)
 
@@ -168,10 +180,12 @@ class TimeAfterTimeScheduler:
 
             self._current_event=self._scheduler.enter(self.delay_time, 0, self._perform, ())
             self.current_attempt_times=1
-        except FunctionReturnsValueError,message:
-            _logger.error(message)
-        except Exception,message:
-            _logger.error(message)
+        except FunctionReturnsValueError:
+            e = sys.exc_info()[1]
+            _logger.error(e.args[0])
+        except Exception:
+            e = sys.exc_info()[1]
+            _logger.error(e.args[0])
             _logger.warn("This process has attempted to execute task function up to %s times." %(self.current_attempt_times))
             
             if self.current_attempt_times<self.max_attempt_times:
@@ -422,10 +436,12 @@ class TimeRangeScheduler:
 
             self._current_event=self._scheduler.enter(self.delay_time, 0, self._perform, ())
             self.current_attempt_times=1
-        except FunctionReturnsValueError,message:
-            _logger.error(message)
-        except Exception,message:
-            _logger.error(message)
+        except FunctionReturnsValueError:
+            e = sys.exc_info()[1]
+            _logger.error(e.args[0])
+        except Exception:
+            e = sys.exc_info()[1]
+            _logger.error(e.args[0])
             _logger.warn("This process has attempted to execute task function up to %s times." %(self.current_attempt_times))
             if self.current_attempt_times<self.max_attempt_times:
                 self.current_attempt_times=self.current_attempt_times+1
@@ -433,7 +449,7 @@ class TimeRangeScheduler:
             else:
                 if self._task_failed_mode=="exit":
                     _logger.error("This process exits.")
-                    return
+                    raise TaskFunctionExecutedError("The task executed failed,when the mode of task failed is 'exit'")
                 elif self._task_failed_mode=="skip":
                     self.current_attempt_times=1
                     steps={self._interval_type:self._step_direction*self.intervals}

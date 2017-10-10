@@ -1,8 +1,13 @@
 #! /usr/bin/env python
 # coding=UTF-8
 
+import sys
 import subprocess
 
+if sys.version > '3':
+    PY3 = True
+else:
+    PY3 = False
 
 
 class CommandResult(object):
@@ -36,4 +41,11 @@ class CommandExecutor:
             command, shell=True, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         output, err = process.communicate()
         status = process.poll()
+
+        if PY3:
+            if output:
+                output=output.decode('utf-8')
+            if err:
+                err=err.decode('utf-8')
+
         return CommandResult(output, err, status)
